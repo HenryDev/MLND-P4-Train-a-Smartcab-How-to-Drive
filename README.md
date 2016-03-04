@@ -37,6 +37,12 @@ This project requires Python 2.7 with the pygame library installed:
 
 https://www.pygame.org/wiki/GettingStarted
 
+To install on OSX:
+
+`brew install sdl sdl_ttf sdl_image sdl_mixer portmidi`
+
+`conda install -c https://conda.anaconda.org/quasiben pygame`
+
 ## Code
 
 Open `smartcab/agent.py` and implement `LearningAgent`. Follow `TODO`s for further instructions.
