@@ -15,24 +15,29 @@ class LearningAgent(Agent):
         valid_actions = Environment.valid_actions
         self.q_values = pandas.DataFrame(columns=valid_actions,
                                          index=itertools.product(['red', 'green'], valid_actions)).fillna(3.14159265)
+        self.deadline_tracker = 0
+        self.trip_reward = 0
 
     def reset(self, destination=None):
         self.planner.route_to(destination)
+        self.trip_reward = 0
 
     def update(self, t):
         # Gather inputs
         self.next_waypoint = self.planner.next_waypoint()  # from route planner, also displayed by simulator
         inputs = self.env.sense(self)
         deadline = self.env.get_deadline(self)
-
+        self.deadline_tracker += deadline if deadline <= 1 else 0
         self.state = (inputs['light'], self.next_waypoint)
 
         action, q_value = self.choose_action_and_q_value(self.state)
 
         # Execute action and get reward
         reward = self.env.act(self, action)
+        self.trip_reward += reward
         self.update_q_value(reward, q_value, self.state, action)
-        print "sitrep: deadline = {}, inputs = {}, action = {}, reward = {},".format(deadline, inputs, action, reward)
+        print "sitrep: deadline = {}, inputs = {}, action = {}, reward = {}, fails={}, total reward={}" \
+            .format(deadline, inputs, action, reward, self.deadline_tracker, self.trip_reward)
 
     def choose_action_and_q_value(self, state):
         row = self.q_values.loc[[state]]
