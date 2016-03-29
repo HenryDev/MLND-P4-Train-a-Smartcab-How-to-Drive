@@ -42,6 +42,25 @@ class TestAgent(unittest.TestCase):
         new_q_value = self.agent.q_values.loc[[state]][action][0]
         self.assertNotEqual(new_q_value, old_q_value)
 
+    def testExploreExploitShouldWorkOnFirstTrip(self):
+        state = ('green', 'forward')
+        self.agent.trip_number = 0
+        self.assertTrue(self.agent.explore_exploit(state)[0] in Environment.valid_actions)
+        self.assertTrue(self.agent.explore_exploit(state)[1] > 0)
+
+    def testChooseActionShouldReturnCorrectQValue(self):
+        state = ('green', 'forward')
+        self.agent.q_values.set_value(state, 'left', 10.123)
+        self.assertEqual(self.agent.choose_action_and_q_value(state)[0], 'left')
+        self.assertEqual(self.agent.choose_action_and_q_value(state)[1], 10.123)
+
+    def testExploreExploitShouldWorkOnBillionthTrip(self):
+        state = ('green', 'forward')
+        self.agent.trip_number = 1000000000
+        self.agent.q_values.set_value(state, 'left', 10.123)
+        self.assertEqual(self.agent.choose_action_and_q_value(state)[0], 'left')
+        self.assertEqual(self.agent.choose_action_and_q_value(state)[1], 10.123)
+
 
 if __name__ == '__main__':
     unittest.main()

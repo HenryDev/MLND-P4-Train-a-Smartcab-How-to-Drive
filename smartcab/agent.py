@@ -1,7 +1,7 @@
 from environment import Agent, Environment
 from planner import RoutePlanner
 from simulator import Simulator
-import pandas, itertools
+import random, pandas, itertools
 
 
 class LearningAgent(Agent):
@@ -17,10 +17,12 @@ class LearningAgent(Agent):
                                          index=itertools.product(['red', 'green'], valid_actions)).fillna(3.14159265)
         self.deadline_tracker = 0
         self.trip_reward = 0
+        self.trip_number = 0
 
     def reset(self, destination=None):
         self.planner.route_to(destination)
         self.trip_reward = 0
+        self.trip_number += 1
 
     def update(self, t):
         # Gather inputs
@@ -30,25 +32,34 @@ class LearningAgent(Agent):
         self.deadline_tracker += deadline if deadline <= 1 else 0
         self.state = (inputs['light'], self.next_waypoint)
 
-        action, q_value = self.choose_action_and_q_value(self.state)
+        action, q_value = self.explore_exploit(self.state)
 
         # Execute action and get reward
         reward = self.env.act(self, action)
         self.trip_reward += reward
         self.update_q_value(reward, q_value, self.state, action)
-        print "sitrep: deadline = {}, inputs = {}, action = {}, reward = {}, fails={}, total reward={}" \
-            .format(deadline, inputs, action, reward, self.deadline_tracker, self.trip_reward)
+        print "sitrep: deadline = {}, inputs = {}, action = {}, reward = {}, fails={}, total reward={},trip#={}" \
+            .format(deadline, inputs, action, reward, self.deadline_tracker, self.trip_reward, self.trip_number)
 
     def choose_action_and_q_value(self, state):
         row = self.q_values.loc[[state]]
         action = row.idxmax(axis=1)[0]
-        q_value = row.max(axis=1)[0]
+        q_value = row[action][0]
         return action, q_value
 
     def update_q_value(self, reward, q_value, state, action):
         discount_factor = 0.5
         new_q = reward + discount_factor * q_value
         self.q_values.set_value(state, action, new_q)
+
+    def explore_exploit(self, state):
+        explore_chance = 1 / (self.trip_number + 0.9)
+        if random.random() < explore_chance:
+            action = random.choice(Environment.valid_actions)
+            q_value = self.q_values.loc[[state]][action][0]
+        else:
+            action, q_value = self.choose_action_and_q_value(state)
+        return action, q_value
 
 
 def run():
