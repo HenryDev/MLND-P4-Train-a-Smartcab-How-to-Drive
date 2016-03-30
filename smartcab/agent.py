@@ -1,7 +1,9 @@
 from environment import Agent, Environment
 from planner import RoutePlanner
 from simulator import Simulator
-import random, pandas, itertools
+import random
+import pandas
+import itertools
 
 
 class LearningAgent(Agent):
@@ -38,7 +40,7 @@ class LearningAgent(Agent):
         reward = self.env.act(self, action)
         self.trip_reward += reward
         self.update_q_value(reward, q_value, self.state, action)
-        print "sitrep: deadline = {}, inputs = {}, action = {}, reward = {}, fails={}, total reward={},trip#={}" \
+        print "deadline = {}, inputs = {}, action = {}, reward = {}, fails = {}, total reward = {}, trip# = {}" \
             .format(deadline, inputs, action, reward, self.deadline_tracker, self.trip_reward, self.trip_number)
 
     def choose_action_and_q_value(self, state):
@@ -48,9 +50,17 @@ class LearningAgent(Agent):
         return action, q_value
 
     def update_q_value(self, reward, q_value, state, action):
-        discount_factor = 0.5
-        new_q = reward + discount_factor * q_value
-        self.q_values.set_value(state, action, new_q)
+        discount_factor = 0.55
+        learning_rate = 0.98
+
+        new_state = (self.env.sense(self)['light'], self.next_waypoint)
+        new_q = self.choose_action_and_q_value(new_state)[1]
+
+        new_q = q_value + learning_rate * (reward + discount_factor * new_q - q_value)
+        self.q_values.set_value(new_state, action, new_q)
+
+        q_value += learning_rate * (reward + discount_factor * new_q - q_value)
+        self.q_values.set_value(state, action, q_value)
 
     def explore_exploit(self, state):
         explore_chance = 1 / (self.trip_number + 0.9)
