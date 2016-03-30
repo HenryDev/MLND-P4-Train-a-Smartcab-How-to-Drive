@@ -17,12 +17,14 @@ class LearningAgent(Agent):
         valid_actions = Environment.valid_actions
         self.q_values = pandas.DataFrame(columns=valid_actions,
                                          index=itertools.product(['red', 'green'], valid_actions)).fillna(3.14159265)
-        self.deadline_tracker = 0
+        self.deadline_tracker = []
         self.trip_reward = 0
         self.trip_number = 0
+        self.rewards = []
 
     def reset(self, destination=None):
         self.planner.route_to(destination)
+        self.rewards.append(self.trip_reward)
         self.trip_reward = 0
         self.trip_number += 1
 
@@ -31,7 +33,7 @@ class LearningAgent(Agent):
         self.next_waypoint = self.planner.next_waypoint()  # from route planner, also displayed by simulator
         inputs = self.env.sense(self)
         deadline = self.env.get_deadline(self)
-        self.deadline_tracker += deadline if deadline <= 1 else 0
+        self.deadline_tracker.append(self.trip_number) if deadline < 1 else 0
         self.state = (inputs['light'], self.next_waypoint)
 
         action, q_value = self.explore_exploit(self.state)
@@ -40,8 +42,8 @@ class LearningAgent(Agent):
         reward = self.env.act(self, action)
         self.trip_reward += reward
         self.update_q_value(reward, q_value, self.state, action)
-        print "deadline = {}, inputs = {}, action = {}, reward = {}, fails = {}, total reward = {}, trip# = {}" \
-            .format(deadline, inputs, action, reward, self.deadline_tracker, self.trip_reward, self.trip_number)
+        print "deadline = {}, inputs = {}, action = {}, reward = {}, trip# = {}" \
+            .format(deadline, inputs, action, reward, self.trip_number)
 
     def choose_action_and_q_value(self, state):
         row = self.q_values.loc[[state]]
@@ -50,8 +52,8 @@ class LearningAgent(Agent):
         return action, q_value
 
     def update_q_value(self, reward, q_value, state, action):
-        discount_factor = 0.55
-        learning_rate = 0.98
+        discount_factor = 0.5
+        learning_rate = 0.8
 
         new_state = (self.env.sense(self)['light'], self.next_waypoint)
         new_q = self.choose_action_and_q_value(new_state)[1]
@@ -83,6 +85,8 @@ def run():
     # Now simulate it
     sim = Simulator(e, update_delay=0.01)  # reduce update_delay to speed up simulation
     sim.run(n_trials=100)  # press Esc or close pygame window to quit
+    print 'trip rewards: {}'.format(a.rewards)
+    print 'Missed deadlines: {}'.format(a.deadline_tracker)
 
 
 if __name__ == '__main__':
