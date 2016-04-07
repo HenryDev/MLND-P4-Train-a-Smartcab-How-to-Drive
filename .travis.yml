@@ -14,6 +14,7 @@ install:
   # - conda update -q conda
   # - conda create -q -n test-environment numpy pandas
   # - source activate test-environment
+  - pip install pandas
 virtualenv:
     system_site_packages: true
 script: nosetests
