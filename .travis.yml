@@ -7,4 +7,4 @@ install:
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
-  - conda install tlatorre/pygame
+  - conda install -c https://conda.anaconda.org/tlatorre pygame
