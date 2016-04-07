@@ -1,4 +1,5 @@
 language: python
 script: nosetests
 install:
-- pip install pygame
+- wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh
+- conda install pygame
