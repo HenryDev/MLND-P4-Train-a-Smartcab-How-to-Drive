@@ -1,4 +1,4 @@
 language: python
 script: nosetests
 install:
-- conda install pygame
+- pip install pygame
