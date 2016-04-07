@@ -1,6 +1,8 @@
 # MLND-P4-Train-a-Smartcab-How-to-Drive
 Udacity Machine Learning Engineer Nanodegree Project 4
 
+[![Build Status](https://travis-ci.org/HenryDev/MLND-P4-Train-a-Smartcab-How-to-Drive.svg?branch=master)](https://travis-ci.org/HenryDev/MLND-P4-Train-a-Smartcab-How-to-Drive)
+
 A smartcab is a self-driving car from the not-so-distant future that ferries people from one arbitrary location to another. In this project, you will use reinforcement learning to train a smartcab how to drive.
 
 Environment
