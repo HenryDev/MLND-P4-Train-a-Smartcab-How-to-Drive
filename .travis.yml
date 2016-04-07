@@ -8,3 +8,4 @@ install:
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
   - conda install -c https://conda.anaconda.org/tlatorre pygame
+  - source activate test-environment
