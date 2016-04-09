@@ -17,7 +17,7 @@ class LearningAgent(Agent):
                                                                  valid_actions,  # 4 way intersection
                                                                  valid_actions,
                                                                  valid_actions,
-                                                                 valid_actions)).fillna(3141.59265)
+                                                                 valid_actions)).fillna(3.14159265)
         self.deadline_tracker = []
         self.trip_reward = 0
         self.trip_number = 0
@@ -52,8 +52,8 @@ class LearningAgent(Agent):
         return action, q_value
 
     def update_q_value(self, reward, q_value, state, action):
-        discount_factor = 0.5
-        learning_rate = 0.8
+        discount_factor = 0.2
+        learning_rate = 0.7
         new_state = self.get_current_state()
         new_q = self.choose_action_and_q_value(new_state)[1]
         new_q = (1 - learning_rate) * q_value + learning_rate * (reward + discount_factor * new_q)
@@ -74,7 +74,7 @@ def run():
     a = e.create_agent(LearningAgent)
     e.set_primary_agent(a, enforce_deadline=True)  # set agent to track
     sim = Simulator(e, update_delay=0.01)  # reduce update_delay to speed up simulation
-    sim.run(n_trials=250)  # press Esc or close pygame window to quit
+    sim.run(n_trials=100)  # press Esc or close pygame window to quit
     print 'trip rewards: {}'.format(a.rewards)
     print 'Missed deadlines: {}'.format(a.deadline_tracker)
 
